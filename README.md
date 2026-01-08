@@ -1,6 +1,4 @@
 # HealthRegenMod
-A fully configurable health regeneration mod with god mode. Customize max health, regen rate, and toggle features via in-game menu.
-# HealthRegenMod
 
 A fully configurable BepInEx mod that provides health regeneration and god mode functionality with extensive customization options.
 
@@ -141,3 +139,7 @@ This mod is provided as-is. Use at your own risk. The author is not responsible 
   - BepInEx team
   - Harmony library contributors
   - REPOConfig developers for configuration system
+
+---
+
+*Enjoy the mod! If you have any questions or feedback, please refer to the game's modding community for support.*
