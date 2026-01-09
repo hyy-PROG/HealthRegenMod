@@ -11,7 +11,7 @@
 - `GetPlayerHealth()` - Get player's current health
 - `SaveConfig()` - Save configuration to file
 
-For complete API documentation, see [API_WIKI.md](API_WIKI.md)
+For complete API documentation, see [API.md](API.md)
 
 ## Compatibility
 
@@ -103,5 +103,6 @@ This mod is provided as-is. Use at your own risk. The author is not responsible 
   - REPOConfig developers for configuration system
 
 ---
+
 
 *Enjoy the mod! If you have any questions or feedback, please refer to the game's modding community for support.*
