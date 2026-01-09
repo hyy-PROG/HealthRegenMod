@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace HealthRegenMod
 {
-    [BepInPlugin("hyy.HealthRegenMod", "HealthRegenMod", "1.0.0")]
+    [BepInPlugin("hyy.HealthRegenMod", "HealthRegenMod", "1.1.2")]
     [BepInProcess("REPO.exe")]
     public class Plugin : BaseUnityPlugin
     {
@@ -33,7 +33,7 @@ namespace HealthRegenMod
                     ModLog.LogInfo("HealthRegenMod loaded successfully!");
                     ModLog.LogInfo($"Configuration loaded - MaxHealth: {PluginConfig.MaxHealth.Value}, GodMode: {PluginConfig.EnableGodMode.Value}, RegenPerFrame: {PluginConfig.HealthRegenPerFrame.Value}");
                     ModLog.LogInfo("author: lingzhu");
-                    ModLog.LogInfo("version: 1.0.0");
+                    ModLog.LogInfo("version: 1.1.2");
                     ModLog.LogInfo("==========================================");
                 }
             }

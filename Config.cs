@@ -46,7 +46,7 @@ namespace HealthRegenMod
                     10000,
                     new ConfigDescription(
                         "Maximum health value for the player",
-                        new AcceptableValueRange<int>(100, 100000)
+                        new AcceptableValueRange<int>(1, 10000000)
                     )
                 );
 

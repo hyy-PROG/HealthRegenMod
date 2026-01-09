@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
     <AssemblyName>HealthRegenMod</AssemblyName>
     <RootNamespace>HealthRegenMod</RootNamespace>
-    <Version>1.0.0.0</Version>
+    <Version>1.1.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -74,5 +73,4 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="D:\Steam\steamapps\common\REPO\BepInEx\plugins\" />
     <Message Text="Copied $(TargetFileName) to game plugins folder" Importance="high" />
   </Target>
-
 </Project>
