@@ -75,7 +75,13 @@ If REPOConfig is not installed, you can edit the configuration file manually:
 
 ## Version History
 
-### v1.1.0 (Current)
+### v1.1.2
+- Expanded maximum health range from 100-100,000 to 1-10,000,000
+- Added GitHub URL to manifest.json
+- Improved mod compatibility with other health-related mods
+- Fixed minor bugs in health regeneration calculation
+
+### v1.1.0
 - Added full configuration support
 - Integrated with REPOConfig in-game menu
 - Added health regeneration rate control
