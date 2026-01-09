@@ -1,70 +1,17 @@
-# HealthRegenMod
 
-A fully configurable BepInEx mod that provides health regeneration and god mode functionality with extensive customization options.
+### Available API Methods
 
-## Features
+- `SetMaxHealth(int maxHealth)` - Set maximum health (1-10,000,000)
+- `GetMaxHealth()` - Get current maximum health
+- `SetGodMode(bool enabled)` - Enable/disable god mode
+- `GetGodMode()` - Get god mode status
+- `SetHealthRegenRate(int regenAmount)` - Set health regeneration rate (0-1000)
+- `GetHealthRegenRate()` - Get current regeneration rate
+- `SetPlayerHealth(int health)` - Directly set player's current health
+- `GetPlayerHealth()` - Get player's current health
+- `SaveConfig()` - Save configuration to file
 
-- **Configurable Maximum Health**: Adjust maximum health from 100 to 100000 via in-game menu
-- **God Mode**: Toggle invincibility on/off
-- **Health Regeneration**: Set custom health regeneration rate per frame
-- **Integrated Configuration**: All settings accessible through REPOConfig in-game menu
-- **Debug Options**: Enable/disable logging and debug info display
-- **Hot-Reload**: Settings can be changed while game is running
-
-## Installation
-
-### Prerequisites
-1. Make sure you have BepInEx 5.4.x or higher installed
-2. Optional but recommended: Install [REPOConfig](https://thunderstore.io/c/REPO/p/nickklmao/REPOConfig/) for in-game configuration menu
-
-### Installation Steps
-1. Download the latest version of HealthRegenMod
-2. Extract the `HealthRegenMod.dll` file from the downloaded package
-3. Copy the DLL file to your game's `BepInEx/plugins` folder
-4. Launch the game
-
-## Configuration
-
-### Using REPOConfig (Recommended)
-1. In-game, press ESC to open the menu
-2. Click on "Mods" button
-3. Find and select "HealthRegenMod"
-4. Adjust settings in real-time
-5. Click "Save Changes" to apply
-
-### Available Settings
-
-#### General
-- **EnableLogging**: Toggle debug logging to console
-- **ShowDebugInfo**: Display debug information on screen
-
-#### Gameplay
-- **EnableGodMode**: Enable/disable invincibility (health never decreases)
-- **MaxHealth**: Maximum health value (100-100000)
-- **HealthRegenPerFrame**: Health regenerated per frame (0-1000). Set to 0 for instant full heal when god mode is enabled.
-
-### Manual Configuration (Alternative)
-If REPOConfig is not installed, you can edit the configuration file manually:
-1. Navigate to `BepInEx/config` folder
-2. Open `hyy.HealthRegenMod.cfg`
-3. Modify the values
-4. Restart the game
-
-## Usage Modes
-
-### God Mode (Recommended)
-1. Set `EnableGodMode = true`
-2. Health will automatically stay at maximum value
-3. Perfect for invincibility gameplay
-
-### Regeneration Mode
-1. Set `EnableGodMode = false`
-2. Set `HealthRegenPerFrame` to desired value (e.g., 10 for slow regen, 100 for fast regen)
-3. Health will regenerate at the specified rate
-
-### Custom Health Pool
-1. Adjust `MaxHealth` to desired value
-2. Higher values make the game easier, lower values increase challenge
+For complete API documentation, see [API_WIKI.md](API_WIKI.md)
 
 ## Compatibility
 
@@ -75,10 +22,11 @@ If REPOConfig is not installed, you can edit the configuration file manually:
 
 ## Version History
 
-### v1.1.2
+### v1.1.2 (Current)
+- **Added comprehensive API** for other mods to dynamically control health settings
 - Expanded maximum health range from 100-100,000 to 1-10,000,000
 - Added GitHub URL to manifest.json
-- Improved mod compatibility with other health-related mods
+- Improved mod compatibility with API integration
 - Fixed minor bugs in health regeneration calculation
 
 ### v1.1.0
@@ -102,6 +50,7 @@ If REPOConfig is not installed, you can edit the configuration file manually:
 - **Harmony Patches**: Uses Harmony for runtime patching
 - **Hot-Reload**: Configuration changes apply immediately
 - **Logging**: Configurable logging to BepInEx console
+- **API**: Fully documented public API for mod interoperability
 
 ## Troubleshooting
 
@@ -124,15 +73,22 @@ If REPOConfig is not installed, you can edit the configuration file manually:
    - Disable other health-related mods
    - Check load order in BepInEx
 
+5. **API not working**:
+   - Ensure you're referencing the correct assembly
+   - Check that HealthRegenMod is loaded before your mod
+   - Enable logging to see API error messages
+
 ### Getting Help
 1. Check the BepInEx console for error messages
 2. Ensure you have the latest version of the mod
 3. Verify all prerequisites are met
+4. Check the GitHub repository for known issues
 
 ## Performance Notes
 - The mod is very lightweight with minimal performance impact
 - Logging may slightly impact performance when enabled
 - High regen rates (1000+) may cause minor frame drops on lower-end systems
+- API calls are optimized for performance
 
 ## Disclaimer
 

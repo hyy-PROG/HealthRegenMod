@@ -14,20 +14,20 @@ namespace HealthRegenMod
     {
         internal static ManualLogSource ModLog;
         private static Harmony _harmony;
-        
+
         private void Awake()
         {
             ModLog = Logger;
-            
+
             try
             {
                 // 初始化配置
                 PluginConfig.InitConfig(Config);
-                
+
                 // 应用Harmony补丁
                 _harmony = new Harmony("hyy.HealthRegenMod");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
-                
+
                 if (PluginConfig.EnableLogging.Value)
                 {
                     ModLog.LogInfo("HealthRegenMod loaded successfully!");
@@ -57,7 +57,7 @@ namespace HealthRegenMod
             try
             {
                 if (!PluginConfig.EnableGodMode.Value) return;
-                
+
                 if (maxHealthField == null)
                 {
                     maxHealthField = typeof(PlayerHealth).GetField("maxHealth",
@@ -68,11 +68,11 @@ namespace HealthRegenMod
                 {
                     int targetMaxHealth = PluginConfig.MaxHealth.Value;
                     int currentMaxHealth = (int)maxHealthField.GetValue(__instance);
-                    
+
                     if (currentMaxHealth != targetMaxHealth)
                     {
                         maxHealthField.SetValue(__instance, targetMaxHealth);
-                        
+
                         if (PluginConfig.EnableLogging.Value)
                         {
                             Plugin.ModLog.LogInfo($"Set max health to {targetMaxHealth}");
@@ -118,21 +118,21 @@ namespace HealthRegenMod
                     int currentHealth = (int)healthField.GetValue(__instance);
                     int currentMaxHealth = (int)maxHealthField.GetValue(__instance);
                     int targetMaxHealth = PluginConfig.MaxHealth.Value;
-                    
+
                     // 确保最大生命值正确
                     if (currentMaxHealth != targetMaxHealth)
                     {
                         maxHealthField.SetValue(__instance, targetMaxHealth);
                         currentMaxHealth = targetMaxHealth;
                     }
-                    
+
                     if (PluginConfig.EnableGodMode.Value)
                     {
                         // 上帝模式：立即恢复生命值
                         if (currentHealth < currentMaxHealth)
                         {
                             healthField.SetValue(__instance, currentMaxHealth);
-                            
+
                             if (PluginConfig.EnableLogging.Value)
                             {
                                 Plugin.ModLog.LogDebug($"God mode active: Health restored to {currentMaxHealth}");
@@ -144,11 +144,11 @@ namespace HealthRegenMod
                         // 非上帝模式：按配置回复生命值
                         int regenAmount = PluginConfig.HealthRegenPerFrame.Value;
                         int newHealth = Mathf.Min(currentHealth + regenAmount, currentMaxHealth);
-                        
+
                         if (newHealth != currentHealth)
                         {
                             healthField.SetValue(__instance, newHealth);
-                            
+
                             if (PluginConfig.EnableLogging.Value)
                             {
                                 Plugin.ModLog.LogDebug($"Health regen: {currentHealth} -> {newHealth} (+{regenAmount})");
