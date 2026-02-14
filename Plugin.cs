@@ -8,16 +8,20 @@ using UnityEngine;
 
 namespace HealthRegenMod
 {
-    [BepInPlugin("hyy.HealthRegenMod", "HealthRegenMod", "1.1.2")]
+    [BepInPlugin("hyy.HealthRegenMod", "HealthRegenMod", "1.2.0")]
     [BepInProcess("REPO.exe")]
+    [BepInDependency("nickklmao-REPOConfig")]
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource ModLog;
         private static Harmony _harmony;
+        private static GameObject _managerObject;
 
         private void Awake()
         {
             ModLog = Logger;
+            _managerObject = new GameObject("HealthRegenMod_Manager");
+            UnityEngine.Object.DontDestroyOnLoad(_managerObject);
 
             try
             {
@@ -28,54 +32,176 @@ namespace HealthRegenMod
                 _harmony = new Harmony("hyy.HealthRegenMod");
                 _harmony.PatchAll(Assembly.GetExecutingAssembly());
 
+                // 添加更新组件
+                _managerObject.AddComponent<HealthRegenUpdater>();
+
                 if (PluginConfig.EnableLogging.Value)
                 {
-                    ModLog.LogInfo("HealthRegenMod loaded successfully!");
-                    ModLog.LogInfo($"Configuration loaded - MaxHealth: {PluginConfig.MaxHealth.Value}, GodMode: {PluginConfig.EnableGodMode.Value}, RegenPerFrame: {PluginConfig.HealthRegenPerFrame.Value}");
+                    ModLog.LogInfo("HealthRegenMod 1.2.0 loaded successfully!");
+                    ModLog.LogInfo($"Game Version: 0.3.2 Compatibility");
+                    ModLog.LogInfo($"Configuration loaded - MaxHealth: {PluginConfig.MaxHealth.Value}, GodMode: {PluginConfig.EnableGodMode.Value}");
                     ModLog.LogInfo("author: lingzhu");
-                    ModLog.LogInfo("version: 1.1.2");
                     ModLog.LogInfo("==========================================");
                 }
             }
             catch (Exception ex)
             {
-                ModLog.LogError($"Load error: {ex.Message}");
+                ModLog.LogError($"Load error: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_harmony != null)
+            {
+                _harmony.UnpatchSelf();
+            }
+
+            if (_managerObject != null)
+            {
+                UnityEngine.Object.Destroy(_managerObject);
             }
         }
     }
 
-    #region 健康修改部分
-
-    [HarmonyPatch(typeof(PlayerHealth), "Start")]
-    public class SetMaxHealthPatch
+    /// <summary>
+    /// 更新器组件，负责每帧更新
+    /// </summary>
+    internal class HealthRegenUpdater : MonoBehaviour
     {
-        private static FieldInfo maxHealthField;
+        private PlayerHealth _cachedPlayerHealth;
+        private FieldInfo _photonViewField;
+        private FieldInfo _healthField;
+        private FieldInfo _maxHealthField;
+        private FieldInfo _isMenuAvatarField;
 
-        [HarmonyPostfix]
-        static void Postfix(PlayerHealth __instance)
+        private void Start()
+        {
+            // 使用反射获取字段信息
+            _photonViewField = typeof(PlayerHealth).GetField("photonView",
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            _healthField = typeof(PlayerHealth).GetField("health",
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            _maxHealthField = typeof(PlayerHealth).GetField("maxHealth",
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            _isMenuAvatarField = typeof(PlayerHealth).GetField("isMenuAvatar",
+                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+        }
+
+        private void Update()
         {
             try
             {
-                if (!PluginConfig.EnableGodMode.Value) return;
-
-                if (maxHealthField == null)
+                if (_cachedPlayerHealth == null || !_cachedPlayerHealth.gameObject.activeInHierarchy)
                 {
-                    maxHealthField = typeof(PlayerHealth).GetField("maxHealth",
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    _cachedPlayerHealth = UnityEngine.Object.FindObjectOfType<PlayerHealth>();
+                    if (_cachedPlayerHealth == null) return;
+
+                    // 检查是否是菜单角色
+                    bool isMenuAvatar = false;
+                    if (_isMenuAvatarField != null)
+                    {
+                        isMenuAvatar = (bool)_isMenuAvatarField.GetValue(_cachedPlayerHealth);
+                    }
+
+                    if (isMenuAvatar)
+                    {
+                        _cachedPlayerHealth = null;
+                        return;
+                    }
+
+                    // 检查是否是本地玩家（多人游戏）
+                    if (_photonViewField != null)
+                    {
+                        var photonView = _photonViewField.GetValue(_cachedPlayerHealth);
+                        // 使用反射检查 IsMine 属性
+                        if (photonView != null)
+                        {
+                            var isMineProperty = photonView.GetType().GetProperty("IsMine");
+                            if (isMineProperty != null)
+                            {
+                                bool isMine = (bool)isMineProperty.GetValue(photonView);
+                                if (!isMine)
+                                {
+                                    _cachedPlayerHealth = null;
+                                    return;
+                                }
+                            }
+                        }
+                    }
                 }
 
-                if (__instance != null && maxHealthField != null)
+                ApplyModEffects(_cachedPlayerHealth);
+            }
+            catch (Exception ex)
+            {
+                if (PluginConfig.EnableLogging.Value)
                 {
-                    int targetMaxHealth = PluginConfig.MaxHealth.Value;
-                    int currentMaxHealth = (int)maxHealthField.GetValue(__instance);
+                    Plugin.ModLog.LogError($"Updater error: {ex.Message}");
+                }
+            }
+        }
 
-                    if (currentMaxHealth != targetMaxHealth)
+        private void ApplyModEffects(PlayerHealth playerHealth)
+        {
+            if (playerHealth == null) return;
+
+            try
+            {
+                // 获取当前生命值和最大生命值
+                int currentHealth = 100;
+                int currentMaxHealth = 100;
+
+                if (_healthField != null)
+                {
+                    currentHealth = (int)_healthField.GetValue(playerHealth);
+                }
+
+                if (_maxHealthField != null)
+                {
+                    currentMaxHealth = (int)_maxHealthField.GetValue(playerHealth);
+                }
+
+                int targetMaxHealth = PluginConfig.MaxHealth.Value;
+
+                // 应用最大生命值
+                if (currentMaxHealth != targetMaxHealth)
+                {
+                    _maxHealthField?.SetValue(playerHealth, targetMaxHealth);
+                    currentMaxHealth = targetMaxHealth;
+
+                    if (PluginConfig.EnableLogging.Value)
                     {
-                        maxHealthField.SetValue(__instance, targetMaxHealth);
+                        Plugin.ModLog.LogDebug($"Set max health to {targetMaxHealth}");
+                    }
+                }
+
+                // 上帝模式
+                if (PluginConfig.EnableGodMode.Value)
+                {
+                    if (currentHealth < currentMaxHealth)
+                    {
+                        _healthField?.SetValue(playerHealth, currentMaxHealth);
 
                         if (PluginConfig.EnableLogging.Value)
                         {
-                            Plugin.ModLog.LogInfo($"Set max health to {targetMaxHealth}");
+                            Plugin.ModLog.LogDebug($"God mode: Health restored to {currentMaxHealth}");
+                        }
+                    }
+                }
+                // 生命恢复
+                else if (PluginConfig.HealthRegenPerFrame.Value > 0)
+                {
+                    int regenAmount = PluginConfig.HealthRegenPerFrame.Value;
+                    int newHealth = Mathf.Min(currentHealth + regenAmount, currentMaxHealth);
+
+                    if (newHealth != currentHealth)
+                    {
+                        _healthField?.SetValue(playerHealth, newHealth);
+
+                        if (PluginConfig.EnableLogging.Value)
+                        {
+                            Plugin.ModLog.LogDebug($"Health regen: {currentHealth} -> {newHealth} (+{regenAmount})");
                         }
                     }
                 }
@@ -84,84 +210,167 @@ namespace HealthRegenMod
             {
                 if (PluginConfig.EnableLogging.Value)
                 {
-                    Plugin.ModLog.LogError($"Error in SetMaxHealthPatch: {ex.Message}");
+                    Plugin.ModLog.LogError($"ApplyModEffects error: {ex.Message}");
                 }
             }
         }
     }
 
-    [HarmonyPatch(typeof(PlayerHealth), "Update")]
-    public class KeepHealthAtMaxPatch
+    #region Harmony补丁
+
+    [HarmonyPatch(typeof(PlayerHealth), "Hurt")]
+    public class PlayerHealth_Hurt_Patch
     {
-        private static FieldInfo healthField;
-        private static FieldInfo maxHealthField;
+        private static FieldInfo _photonViewField;
+        private static FieldInfo _healthField;
 
         [HarmonyPrefix]
-        static void Prefix(PlayerHealth __instance)
+        static bool Prefix(PlayerHealth __instance, ref int damage, bool savingGrace, int enemyIndex = -1)
         {
             try
             {
-                if (healthField == null)
+                // 初始化字段信息（如果未初始化）
+                if (_photonViewField == null)
                 {
-                    healthField = typeof(PlayerHealth).GetField("health",
+                    _photonViewField = typeof(PlayerHealth).GetField("photonView",
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 }
 
-                if (maxHealthField == null)
+                if (_healthField == null)
                 {
-                    maxHealthField = typeof(PlayerHealth).GetField("maxHealth",
+                    _healthField = typeof(PlayerHealth).GetField("health",
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 }
 
-                if (__instance != null && healthField != null && maxHealthField != null)
+                // 检查是否是本地玩家
+                if (_photonViewField != null)
                 {
-                    int currentHealth = (int)healthField.GetValue(__instance);
-                    int currentMaxHealth = (int)maxHealthField.GetValue(__instance);
-                    int targetMaxHealth = PluginConfig.MaxHealth.Value;
-
-                    // 确保最大生命值正确
-                    if (currentMaxHealth != targetMaxHealth)
+                    var photonView = _photonViewField.GetValue(__instance);
+                    if (photonView != null)
                     {
-                        maxHealthField.SetValue(__instance, targetMaxHealth);
-                        currentMaxHealth = targetMaxHealth;
-                    }
-
-                    if (PluginConfig.EnableGodMode.Value)
-                    {
-                        // 上帝模式：立即恢复生命值
-                        if (currentHealth < currentMaxHealth)
+                        var isMineProperty = photonView.GetType().GetProperty("IsMine");
+                        if (isMineProperty != null)
                         {
-                            healthField.SetValue(__instance, currentMaxHealth);
-
-                            if (PluginConfig.EnableLogging.Value)
-                            {
-                                Plugin.ModLog.LogDebug($"God mode active: Health restored to {currentMaxHealth}");
-                            }
+                            bool isMine = (bool)isMineProperty.GetValue(photonView);
+                            if (!isMine) return true;
                         }
                     }
-                    else if (PluginConfig.HealthRegenPerFrame.Value > 0)
+                }
+
+                // 上帝模式
+                if (PluginConfig.EnableGodMode.Value)
+                {
+                    if (PluginConfig.EnableLogging.Value)
                     {
-                        // 非上帝模式：按配置回复生命值
-                        int regenAmount = PluginConfig.HealthRegenPerFrame.Value;
-                        int newHealth = Mathf.Min(currentHealth + regenAmount, currentMaxHealth);
+                        Plugin.ModLog.LogInfo($"God mode: Blocked {damage} damage");
+                    }
+                    return false; // 跳过原方法
+                }
 
-                        if (newHealth != currentHealth)
+                // 秒杀保护
+                if (PluginConfig.EnableOneShotProtection.Value)
+                {
+                    int currentHealth = 100;
+                    if (_healthField != null)
+                    {
+                        currentHealth = (int)_healthField.GetValue(__instance);
+                    }
+
+                    int originalDamage = damage;
+                    int maxDamage = PluginConfig.MaxSingleDamage.Value;
+                    int minHealth = PluginConfig.OneShotMinHealth.Value;
+
+                    // 应用最大伤害限制
+                    if (maxDamage > 0 && damage > maxDamage)
+                    {
+                        damage = maxDamage;
+
+                        if (PluginConfig.EnableLogging.Value)
                         {
-                            healthField.SetValue(__instance, newHealth);
-
-                            if (PluginConfig.EnableLogging.Value)
-                            {
-                                Plugin.ModLog.LogDebug($"Health regen: {currentHealth} -> {newHealth} (+{regenAmount})");
-                            }
+                            Plugin.ModLog.LogInfo($"One-shot protection: Damage reduced from {originalDamage} to {maxDamage}");
                         }
                     }
+
+                    // 计算受到伤害后的生命值
+                    int healthAfterDamage = currentHealth - damage;
+
+                    // 防止生命值低于最小值
+                    if (healthAfterDamage < minHealth && healthAfterDamage > 0)
+                    {
+                        damage = currentHealth - minHealth;
+
+                        if (PluginConfig.EnableLogging.Value)
+                        {
+                            Plugin.ModLog.LogInfo($"One-shot protection: Adjusted damage to keep minimum {minHealth} health");
+                        }
+                    }
+                    // 防止死亡
+                    else if (healthAfterDamage <= 0)
+                    {
+                        damage = 0;
+
+                        if (PluginConfig.EnableLogging.Value)
+                        {
+                            Plugin.ModLog.LogInfo($"One-shot protection: Prevented fatal damage");
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (PluginConfig.EnableLogging.Value)
+                {
+                    Plugin.ModLog.LogError($"Error in Hurt patch: {ex.Message}");
+                }
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PlayerHealth), "Heal")]
+    public class PlayerHealth_Heal_Patch
+    {
+        private static FieldInfo _photonViewField;
+
+        [HarmonyPrefix]
+        static void Prefix(PlayerHealth __instance, int healAmount, bool effect = true)
+        {
+            try
+            {
+                // 初始化字段信息
+                if (_photonViewField == null)
+                {
+                    _photonViewField = typeof(PlayerHealth).GetField("photonView",
+                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                }
+
+                // 检查是否是本地玩家
+                if (_photonViewField != null)
+                {
+                    var photonView = _photonViewField.GetValue(__instance);
+                    if (photonView != null)
+                    {
+                        var isMineProperty = photonView.GetType().GetProperty("IsMine");
+                        if (isMineProperty != null)
+                        {
+                            bool isMine = (bool)isMineProperty.GetValue(photonView);
+                            if (!isMine) return;
+                        }
+                    }
+                }
+
+                if (PluginConfig.EnableLogging.Value)
+                {
+                    Plugin.ModLog.LogDebug($"Healing: {healAmount} health");
                 }
             }
             catch (Exception ex)
             {
                 if (PluginConfig.EnableLogging.Value)
                 {
-                    Plugin.ModLog.LogError($"Error in KeepHealthAtMaxPatch: {ex.Message}");
+                    Plugin.ModLog.LogError($"Error in Heal patch: {ex.Message}");
                 }
             }
         }

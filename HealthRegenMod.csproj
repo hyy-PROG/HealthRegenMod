@@ -1,76 +1,85 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <OutputType>Library</OutputType>
-    <AssemblyName>HealthRegenMod</AssemblyName>
-    <RootNamespace>HealthRegenMod</RootNamespace>
-    <Version>1.1.2.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Nullable>disable</Nullable>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Deterministic>false</Deterministic>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<OutputType>Library</OutputType>
+		<AssemblyName>HealthRegenMod</AssemblyName>
+		<RootNamespace>HealthRegenMod</RootNamespace>
+		<Version>1.2.0.0</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<OutputPath>bin\$(Configuration)\</OutputPath>
+		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+		<Nullable>disable</Nullable>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Deterministic>false</Deterministic>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <!-- BepInEx 引用 -->
-    <Reference Include="BepInEx">
-      <HintPath>libs\BepInEx\core\BepInEx.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="BepInEx.Harmony">
-      <HintPath>libs\BepInEx\core\BepInEx.Harmony.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="0Harmony">
-      <HintPath>libs\BepInEx\core\0Harmony.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    
-    <!-- Unity 引用 -->
-    <Reference Include="UnityEngine">
-      <HintPath>libs\Unity\UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>libs\Unity\UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    
-    <!-- 游戏程序集引用 -->
-    <Reference Include="Assembly-CSharp">
-      <HintPath>libs\GameAssemblies\Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    
-    <!-- Photon 引用 -->
-    <Reference Include="Photon.Pun">
-      <HintPath>libs\GameAssemblies\PhotonUnityNetworking.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="PhotonRealtime">
-      <HintPath>libs\GameAssemblies\PhotonRealtime.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Photon3Unity3D">
-      <HintPath>libs\GameAssemblies\Photon3Unity3D.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<DebugType>full</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <!-- 通过NuGet安装必要的包 -->
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>TRACE</DefineConstants>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="D:\Steam\steamapps\common\REPO\BepInEx\plugins\" />
-    <Message Text="Copied $(TargetFileName) to game plugins folder" Importance="high" />
-  </Target>
+	<ItemGroup>
+		<!-- BepInEx 核心 DLL -->
+		<Reference Include="BepInEx">
+			<HintPath>D:\Steam\steamapps\common\REPO\BepInEx\core\BepInEx.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="BepInEx.Harmony">
+			<HintPath>D:\Steam\steamapps\common\REPO\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="0Harmony">
+			<HintPath>D:\Steam\steamapps\common\REPO\BepInEx\core\0Harmony.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<!-- Unity 核心 DLL -->
+		<Reference Include="UnityEngine">
+			<HintPath>D:\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>D:\Steam\steamapps\common\REPO\REPO_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<!-- 游戏程序集 -->
+		<Reference Include="Assembly-CSharp">
+			<HintPath>D:\Steam\steamapps\common\REPO\REPO_Data\Managed\Assembly-CSharp.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+
+		<!-- .NET Framework DLL -->
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Xml" />
+		<Reference Include="System.Runtime.Serialization" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="Microsoft.CSharp" />
+	</ItemGroup>
+
+	<!-- 移除 NuGet 包引用，使用本地游戏目录 DLL -->
+	<ItemGroup>
+		<None Include="README.md" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="D:\Steam\steamapps\common\REPO\BepInEx\plugins\" />
+		<Message Text="已复制 $(TargetFileName) 到游戏插件目录" Importance="high" />
+
+		<!-- 复制 PDB 文件用于调试 -->
+		<Copy Condition="Exists('$(TargetDir)$(TargetName).pdb')"
+			  SourceFiles="$(TargetDir)$(TargetName).pdb"
+			  DestinationFolder="D:\Steam\steamapps\common\REPO\BepInEx\plugins\" />
+	</Target>
 </Project>

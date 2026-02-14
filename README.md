@@ -1,108 +1,241 @@
+# HealthRegenMod - Health Regeneration and One-Shot Protection Mod
 
-### Available API Methods
+## Overview
 
-- `SetMaxHealth(int maxHealth)` - Set maximum health (1-10,000,000)
-- `GetMaxHealth()` - Get current maximum health
-- `SetGodMode(bool enabled)` - Enable/disable god mode
-- `GetGodMode()` - Get god mode status
-- `SetHealthRegenRate(int regenAmount)` - Set health regeneration rate (0-1000)
-- `GetHealthRegenRate()` - Get current regeneration rate
-- `SetPlayerHealth(int health)` - Directly set player's current health
-- `GetPlayerHealth()` - Get player's current health
-- `SaveConfig()` - Save configuration to file
+HealthRegenMod is a BepInEx mod for the REPO game that provides powerful health management features, including unlimited health, health regeneration, and one-shot kill protection.
 
-For complete API documentation, see [API.md](API.md)
+## Features
 
-## Compatibility
+### 🛡️ Core Features
+- **God Mode**: Complete immunity to all damage, health never decreases
+- **Max Health Adjustment**: Customizable maximum health (1-10,000,000)
+- **Health Regeneration**: Automatic health regeneration per frame with customizable speed
 
-- **Game Version**: Tested with the latest version of the game
-- **BepInEx Version**: Requires BepInEx 5.4.x or higher
-- **REPOConfig**: Highly recommended for best experience (version 1.2.3+)
-- **Other Mods**: Should be compatible with most other mods
+### 🚫 One-Shot Protection
+- **One-Shot Kill Immunity**: Prevent instant death from single attacks
+- **Damage Limiting**: Cap maximum damage from single hits
+- **Minimum Health Protection**: Maintain at least specified health when taking fatal damage
 
-## Version History
+### ⚙️ Configuration Options
+- Full in-game configuration menu
+- Adjustable parameters for all features
+- Support for hot-reloading configurations
 
-### v1.1.2 (Current)
-- **Added comprehensive API** for other mods to dynamically control health settings
-- Expanded maximum health range from 100-100,000 to 1-10,000,000
-- Added GitHub URL to manifest.json
-- Improved mod compatibility with API integration
-- Fixed minor bugs in health regeneration calculation
+### 🔌 API Interface
+- Complete API for other mods
+- Support for dynamic adjustment of all settings
+- Thread-safe API calls
 
-### v1.1.0
-- Added full configuration support
-- Integrated with REPOConfig in-game menu
-- Added health regeneration rate control
-- Added debug logging toggle
-- Added god mode toggle
-- Added configurable max health
+## Installation
 
-### v1.0.0
-- Initial release
-- Basic health regeneration functionality
-- Fixed maximum health of 10000
-- Basic god mode
+### Prerequisites
+1. BepInEx 5.4.x or higher installed
+2. Game version: REPO
 
-## Technical Details
+### Installation Steps
+1. Download the latest HealthRegenMod.dll
+2. Copy HealthRegenMod.dll to `REPO/BepInEx/plugins/` directory
+3. Launch the game
 
-- **Mod Loader**: BepInEx 5
-- **Configuration**: BepInEx Config system with REPOConfig integration
-- **Harmony Patches**: Uses Harmony for runtime patching
-- **Hot-Reload**: Configuration changes apply immediately
-- **Logging**: Configurable logging to BepInEx console
-- **API**: Fully documented public API for mod interoperability
+## Configuration
+
+### Configuration File Location
+`REPO/BepInEx/config/hyy.HealthRegenMod.cfg`
+
+### Configuration Details
+
+#### General Settings
+- **EnableLogging**: Enable debug logging (Default: false)
+- **ShowDebugInfo**: Show debug information on screen (Default: false)
+
+#### Gameplay
+- **EnableGodMode**: Enable God Mode (Default: true)
+- **MaxHealth**: Maximum health value (Range: 1-10,000,000, Default: 10000)
+- **HealthRegenPerFrame**: Health regenerated per frame (Range: 0-1000, Default: 0)
+
+#### Damage Protection
+- **EnableOneShotProtection**: Enable one-shot kill protection (Default: true)
+- **OneShotMinHealth**: Minimum health to remain after massive damage (Range: 1-1000, Default: 1)
+- **MaxSingleDamage**: Maximum damage that can be taken in a single hit (Range: 0-10000, 0=unlimited, Default: 500)
+
+## API Documentation
+
+### Basic Usage
+```csharp
+using HealthRegenMod;
+
+// Set maximum health
+HealthRegenAPI.SetMaxHealth(50000);
+
+// Enable God Mode
+HealthRegenAPI.SetGodMode(true);
+
+// Set health regeneration rate
+HealthRegenAPI.SetHealthRegenRate(10);
+```
+
+### Advanced Features
+```csharp
+// Enable one-shot protection
+HealthRegenAPI.SetOneShotProtection(true);
+
+// Set minimum health to remain
+HealthRegenAPI.SetOneShotMinHealth(100);
+
+// Set maximum single damage
+HealthRegenAPI.SetMaxSingleDamage(1000);
+
+// Get current player health
+int health = HealthRegenAPI.GetPlayerHealth();
+
+// Directly set player health
+HealthRegenAPI.SetPlayerHealth(1000);
+```
+
+### Error Handling
+```csharp
+try
+{
+    if (!HealthRegenAPI.SetMaxHealth(50000))
+    {
+        // Handle failure
+    }
+}
+catch (Exception ex)
+{
+    // Handle exception
+}
+```
+
+## In-Game Usage
+
+### Enabling/Disabling Features
+1. Launch the game
+2. Press F1 to open BepInEx configuration menu
+3. Find "HealthRegenMod" configuration
+4. Adjust desired settings
+5. Settings are saved automatically
+
+### Recommended Configurations
+
+#### Beginner Friendly
+```
+EnableGodMode = true
+HealthRegenPerFrame = 0
+EnableOneShotProtection = true
+MaxSingleDamage = 1000
+```
+
+#### Challenge Mode
+```
+EnableGodMode = false
+HealthRegenPerFrame = 5
+EnableOneShotProtection = true
+MaxSingleDamage = 500
+OneShotMinHealth = 10
+```
+
+#### Hardcore Mode
+```
+EnableGodMode = false
+HealthRegenPerFrame = 0
+EnableOneShotProtection = false
+```
+
+## Frequently Asked Questions
+
+### Q: The mod is not working, what should I do?
+A: Check the following:
+1. BepInEx is correctly installed
+2. HealthRegenMod.dll is in the correct directory
+3. Game version matches
+4. Check BepInEx console logs
+
+### Q: How to confirm the mod is loaded?
+A: Check the BepInEx console when launching the game, you should see similar messages:
+```
+[Info] HealthRegenMod loaded successfully!
+```
+
+### Q: Do I need to restart the game after changing configurations?
+A: No, configurations take effect immediately. However, some settings may require reloading the game scene.
+
+### Q: Is it compatible with other mods?
+A: This mod uses Harmony for patching and is theoretically compatible with most mods. If there are conflicts, try adjusting the load order.
 
 ## Troubleshooting
 
-### Common Issues
+### Log Analysis
+Enable `EnableLogging` to view detailed logs for troubleshooting:
 
-1. **Mod not loading**:
-   - Ensure BepInEx is properly installed
-   - Check that the DLL is in `BepInEx/plugins` folder
-   - Check BepInEx console for error messages
+1. Enable logging
+2. Check BepInEx console
+3. Fix issues based on error messages
 
-2. **Configuration not appearing in menu**:
-   - Install REPOConfig mod
-   - Ensure REPOConfig is up to date
+### Common Errors
+- **"PlayerHealth type not found"**: Game version mismatch
+- **"Configuration failed to load"**: Corrupted configuration file
+- **"Harmony patches failed"**: Conflict with other mods
 
-3. **Settings not taking effect**:
-   - Click "Save Changes" in REPOConfig menu
-   - For manual configuration, restart the game
+## Developer Information
 
-4. **Conflict with other health mods**:
-   - Disable other health-related mods
-   - Check load order in BepInEx
+### Technical Details
+- **Development Framework**: BepInEx 5
+- **Patching System**: Harmony 2.x
+- **Target Framework**: .NET Framework 4.8
+- **Compilation Requirements**: Visual Studio 2019+
 
-5. **API not working**:
-   - Ensure you're referencing the correct assembly
-   - Check that HealthRegenMod is loaded before your mod
-   - Enable logging to see API error messages
+### Project Structure
+```
+HealthRegenMod/
+├── Plugin.cs          # Main plugin logic
+├── Config.cs          # Configuration management
+├── API.cs             # API interface
+├── AssemblyInfo.cs    # Assembly information
+└── HealthRegenMod.csproj  # Project file
+```
 
-### Getting Help
-1. Check the BepInEx console for error messages
-2. Ensure you have the latest version of the mod
-3. Verify all prerequisites are met
-4. Check the GitHub repository for known issues
+### Contribution Guidelines
+1. Fork the project
+2. Create a feature branch
+3. Commit changes
+4. Open a Pull Request
 
-## Performance Notes
-- The mod is very lightweight with minimal performance impact
-- Logging may slightly impact performance when enabled
-- High regen rates (1000+) may cause minor frame drops on lower-end systems
-- API calls are optimized for performance
+## Version History
+
+### v1.1.4 (Current)
+- Added: One-shot kill protection functionality
+- Added: Damage limiting system
+- Improved: Configuration menu structure
+- Optimized: API interface
+
+### v1.1.3
+- Added: Complete API interface
+- Improved: Configuration validation
+- Fixed: Health regeneration logic
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
+
+## Support & Feedback
+
+### Issue Reporting
+1. Check [Known Issues](#frequently-asked-questions)
+2. Report on GitHub Issues
+3. Provide detailed error logs
+
+### Feature Requests
+Feature requests and suggestions are welcome.
+
+### Contact
+- GitHub: [hyy-PROG/HealthRegenMod](https://github.com/hyy-PROG/HealthRegenMod/)
+- Author: lingzhu
 
 ## Disclaimer
 
-This mod is provided as-is. Use at your own risk. The author is not responsible for any issues that may arise from using this mod, including but not limited to game crashes, save file corruption, or online play restrictions.
-
-## Credits
-
-- **Author**: hyy-prog (lingzhu)
-- **Special Thanks**: 
-  - BepInEx team
-  - Harmony library contributors
-  - REPOConfig developers for configuration system
+This mod is for learning and entertainment purposes only. Using this mod may affect game balance. Please use it in single-player games only. Using in multiplayer games may violate the game's terms of service, use with caution.
 
 ---
 
-
-*Enjoy the mod! If you have any questions or feedback, please refer to the game's modding community for support.*
+**Note**: This mod is still under development, features may change. Check for updates regularly for the latest features and fixes.

@@ -306,7 +306,7 @@ The API is stable and backward compatible. Future versions will maintain compati
 
 | API Version | HealthRegenMod Version | Notes |
 |-------------|----------------------|-------|
-| v1.0        | 1.1.2+              | Initial API release |
+| v1.0        | 1.1.3+              | Initial API release |
 | v1.0        | 1.1.0-1.1.1        | No API available |
 
 ## Best Practices
@@ -353,4 +353,4 @@ For API-related issues or questions:
 
 ---
 
-*Last Updated: Version 1.1.2*
+*Last Updated: Version 1.1.3*
